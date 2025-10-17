@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Categories from "./pages/Categories";
+import CategoryItems from "./pages/CategoryItems";
+import ItemDetails from "./pages/ItemDetails";
 import Auctions from "./pages/Auctions";
 import Celebrity from "./pages/Celebrity";
 import Verify from "./pages/Verify";
@@ -27,6 +29,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/categories" element={<Categories />} />
+          <Route path="/categories/:categoryId" element={<CategoryItems />} />
+          <Route path="/items/:itemId" element={<ItemDetails />} />
           <Route path="/auctions" element={<Auctions />} />
           <Route path="/celebrity" element={<Celebrity />} />
           <Route path="/verify" element={<Verify />} />
