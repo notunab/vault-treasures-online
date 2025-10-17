@@ -162,13 +162,63 @@ export type Database = {
         }
         Relationships: []
       }
+      order_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          item_id: string
+          order_id: string
+          price_at_purchase: number
+          quantity: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          item_id: string
+          order_id: string
+          price_at_purchase: number
+          quantity?: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          item_id?: string
+          order_id?: string
+          price_at_purchase?: number
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           created_at: string
           id: string
           item_id: string
+          order_status: Database["public"]["Enums"]["order_status"] | null
+          payment_method: string | null
           payment_status: Database["public"]["Enums"]["order_status"]
           price: number
+          shipping_address: string | null
+          shipping_city: string | null
+          shipping_name: string | null
+          shipping_phone: string | null
+          shipping_postal_code: string | null
+          total_amount: number | null
           updated_at: string
           user_id: string
         }
@@ -176,8 +226,16 @@ export type Database = {
           created_at?: string
           id?: string
           item_id: string
+          order_status?: Database["public"]["Enums"]["order_status"] | null
+          payment_method?: string | null
           payment_status?: Database["public"]["Enums"]["order_status"]
           price: number
+          shipping_address?: string | null
+          shipping_city?: string | null
+          shipping_name?: string | null
+          shipping_phone?: string | null
+          shipping_postal_code?: string | null
+          total_amount?: number | null
           updated_at?: string
           user_id: string
         }
@@ -185,8 +243,16 @@ export type Database = {
           created_at?: string
           id?: string
           item_id?: string
+          order_status?: Database["public"]["Enums"]["order_status"] | null
+          payment_method?: string | null
           payment_status?: Database["public"]["Enums"]["order_status"]
           price?: number
+          shipping_address?: string | null
+          shipping_city?: string | null
+          shipping_name?: string | null
+          shipping_phone?: string | null
+          shipping_postal_code?: string | null
+          total_amount?: number | null
           updated_at?: string
           user_id?: string
         }
@@ -270,7 +336,14 @@ export type Database = {
         | "home_decor"
         | "books"
         | "music"
-      order_status: "pending" | "paid" | "shipped" | "completed" | "cancelled"
+      order_status:
+        | "pending"
+        | "paid"
+        | "shipped"
+        | "completed"
+        | "cancelled"
+        | "processing"
+        | "delivered"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -413,7 +486,15 @@ export const Constants = {
         "books",
         "music",
       ],
-      order_status: ["pending", "paid", "shipped", "completed", "cancelled"],
+      order_status: [
+        "pending",
+        "paid",
+        "shipped",
+        "completed",
+        "cancelled",
+        "processing",
+        "delivered",
+      ],
     },
   },
 } as const
