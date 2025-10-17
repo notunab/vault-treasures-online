@@ -3,31 +3,24 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Gem, Watch, Palette, Crown, Shirt } from "lucide-react";
+import { Gem, Watch, Palette, Crown, Shirt, Camera, Lipstick, Home, Book, Music } from "lucide-react";
 
 const Categories = () => {
   const navigate = useNavigate();
 
   const categories = [
     {
-      id: "antiques",
-      name: "Antiques",
-      icon: Watch,
-      description: "Timeless pieces from bygone eras",
-      count: 124,
+      id: "cameras",
+      name: "Vintage Cameras",
+      icon: Camera,
+      description: "Classic film & instant cameras",
+      count: 45,
     },
     {
-      id: "celebrity",
-      name: "Celebrity Memorabilia",
-      icon: Crown,
-      description: "Authentic items from icons",
-      count: 87,
-    },
-    {
-      id: "fashion",
-      name: "Vintage Fashion",
+      id: "garments",
+      name: "Vintage Garments",
       icon: Shirt,
-      description: "Classic couture & accessories",
+      description: "Classic fashion & couture",
       count: 203,
     },
     {
@@ -38,11 +31,67 @@ const Categories = () => {
       count: 156,
     },
     {
+      id: "makeup",
+      name: "Vintage Makeup",
+      icon: Lipstick,
+      description: "Collectible cosmetics & compacts",
+      count: 78,
+    },
+    {
+      id: "watches",
+      name: "Luxury Watches",
+      icon: Watch,
+      description: "Timeless timepieces",
+      count: 124,
+    },
+    {
+      id: "home_decor",
+      name: "Home Decor",
+      icon: Home,
+      description: "Elegant vintage furnishings",
+      count: 92,
+    },
+    {
+      id: "books",
+      name: "Rare Books",
+      icon: Book,
+      description: "First editions & manuscripts",
+      count: 67,
+    },
+    {
+      id: "music",
+      name: "Music Collectibles",
+      icon: Music,
+      description: "Vinyl, instruments & memorabilia",
+      count: 53,
+    },
+    {
+      id: "celebrity",
+      name: "Celebrity Memorabilia",
+      icon: Crown,
+      description: "Authentic items from icons",
+      count: 87,
+    },
+    {
       id: "art",
       name: "Art & Collectibles",
       icon: Palette,
       description: "Paintings, sculptures & rarities",
       count: 98,
+    },
+    {
+      id: "antiques",
+      name: "Antiques",
+      icon: Watch,
+      description: "Historic treasures & artifacts",
+      count: 142,
+    },
+    {
+      id: "fashion",
+      name: "Designer Fashion",
+      icon: Crown,
+      description: "Haute couture & accessories",
+      count: 189,
     },
   ];
 

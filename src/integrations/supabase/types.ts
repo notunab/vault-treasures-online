@@ -257,7 +257,19 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
-      item_category: "antiques" | "celebrity" | "fashion" | "jewelry" | "art"
+      item_category:
+        | "antiques"
+        | "celebrity"
+        | "fashion"
+        | "jewelry"
+        | "art"
+        | "makeup"
+        | "garments"
+        | "cameras"
+        | "watches"
+        | "home_decor"
+        | "books"
+        | "music"
       order_status: "pending" | "paid" | "shipped" | "completed" | "cancelled"
     }
     CompositeTypes: {
@@ -387,7 +399,20 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
-      item_category: ["antiques", "celebrity", "fashion", "jewelry", "art"],
+      item_category: [
+        "antiques",
+        "celebrity",
+        "fashion",
+        "jewelry",
+        "art",
+        "makeup",
+        "garments",
+        "cameras",
+        "watches",
+        "home_decor",
+        "books",
+        "music",
+      ],
       order_status: ["pending", "paid", "shipped", "completed", "cancelled"],
     },
   },
