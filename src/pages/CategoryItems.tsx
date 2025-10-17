@@ -24,9 +24,16 @@ const CategoryItems = () => {
   const categoryNames: Record<string, string> = {
     antiques: "Antiques",
     celebrity: "Celebrity Memorabilia",
-    fashion: "Vintage Fashion",
+    fashion: "Designer Fashion",
     jewelry: "Fine Jewelry",
     art: "Art & Collectibles",
+    cameras: "Vintage Cameras",
+    garments: "Vintage Garments",
+    makeup: "Vintage Makeup",
+    watches: "Luxury Watches",
+    home_decor: "Home Decor",
+    books: "Rare Books",
+    music: "Music Collectibles",
   };
 
   const { data: items, isLoading } = useQuery({

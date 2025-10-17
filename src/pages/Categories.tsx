@@ -3,7 +3,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Gem, Watch, Palette, Crown, Shirt, Camera, Lipstick, Home, Book, Music } from "lucide-react";
+import { Gem, Watch, Palette, Crown, Shirt, Camera, Sparkles, Home, Book, Music } from "lucide-react";
 
 const Categories = () => {
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ const Categories = () => {
     {
       id: "makeup",
       name: "Vintage Makeup",
-      icon: Lipstick,
+      icon: Sparkles,
       description: "Collectible cosmetics & compacts",
       count: 78,
     },
