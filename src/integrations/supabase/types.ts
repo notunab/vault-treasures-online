@@ -17,6 +17,7 @@ export type Database = {
       bids: {
         Row: {
           amount: number
+          bidder_name: string | null
           created_at: string
           id: string
           item_id: string
@@ -24,6 +25,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          bidder_name?: string | null
           created_at?: string
           id?: string
           item_id: string
@@ -31,6 +33,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          bidder_name?: string | null
           created_at?: string
           id?: string
           item_id?: string
@@ -107,6 +110,7 @@ export type Database = {
       }
       items: {
         Row: {
+          auction_status: string | null
           category: Database["public"]["Enums"]["item_category"]
           celebrity_name: string | null
           certificate_id: string | null
@@ -117,14 +121,17 @@ export type Database = {
           id: string
           image_url: string | null
           is_auction: boolean
+          min_bid_increment: number | null
           name: string
           price: number
           seller_id: string
           start_time: string | null
           updated_at: string
           verified: boolean
+          winner_user_id: string | null
         }
         Insert: {
+          auction_status?: string | null
           category: Database["public"]["Enums"]["item_category"]
           celebrity_name?: string | null
           certificate_id?: string | null
@@ -135,14 +142,17 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_auction?: boolean
+          min_bid_increment?: number | null
           name: string
           price: number
           seller_id: string
           start_time?: string | null
           updated_at?: string
           verified?: boolean
+          winner_user_id?: string | null
         }
         Update: {
+          auction_status?: string | null
           category?: Database["public"]["Enums"]["item_category"]
           celebrity_name?: string | null
           certificate_id?: string | null
@@ -153,12 +163,14 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_auction?: boolean
+          min_bid_increment?: number | null
           name?: string
           price?: number
           seller_id?: string
           start_time?: string | null
           updated_at?: string
           verified?: boolean
+          winner_user_id?: string | null
         }
         Relationships: []
       }

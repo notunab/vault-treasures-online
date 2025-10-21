@@ -5,14 +5,32 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { User, Package, Hammer, Settings } from "lucide-react";
+import { User, Package, Hammer, Settings, Gavel } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
+import { useQuery } from "@tanstack/react-query";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Check if user is admin
+  const { data: isAdmin } = useQuery({
+    queryKey: ["isAdmin", session?.user?.id],
+    queryFn: async () => {
+      if (!session?.user) return false;
+      
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .single();
+      
+      return data?.role === "admin";
+    },
+    enabled: !!session?.user,
+  });
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -76,11 +94,19 @@ const Dashboard = () => {
       <Navbar />
 
       <div className="container mx-auto px-4 py-16">
-        <div className="flex items-center gap-3 mb-8">
-          <User className="h-8 w-8 text-primary" />
-          <h1 className="text-4xl font-bold font-playfair gold-shimmer">
-            My Dashboard
-          </h1>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <User className="h-8 w-8 text-primary" />
+            <h1 className="text-4xl font-bold font-playfair gold-shimmer">
+              My Dashboard
+            </h1>
+          </div>
+          {isAdmin && (
+            <Button onClick={() => navigate("/create-auction")} size="lg">
+              <Gavel className="mr-2 h-5 w-5" />
+              Create Auction
+            </Button>
+          )}
         </div>
 
         <Tabs defaultValue="listings" className="w-full">

@@ -15,6 +15,8 @@ import About from "./pages/About";
 import Cart from "./pages/Cart";
 import Dashboard from "./pages/Dashboard";
 import ListItem from "./pages/ListItem";
+import CreateAuction from "./pages/CreateAuction";
+import LiveAuction from "./pages/LiveAuction";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +34,8 @@ const App = () => (
           <Route path="/categories/:categoryId" element={<CategoryItems />} />
           <Route path="/items/:itemId" element={<ItemDetails />} />
           <Route path="/auctions" element={<Auctions />} />
+          <Route path="/auction/:itemId" element={<LiveAuction />} />
+          <Route path="/create-auction" element={<CreateAuction />} />
           <Route path="/celebrity" element={<Celebrity />} />
           <Route path="/verify" element={<Verify />} />
           <Route path="/about" element={<About />} />

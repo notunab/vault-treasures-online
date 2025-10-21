@@ -3,11 +3,11 @@ import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Clock, Hammer, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 const Auctions = () => {
   const navigate = useNavigate();
@@ -27,47 +27,56 @@ const Auctions = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Mock auction items (in real app, fetch from database)
-  const auctionItems = [
-    {
-      id: 1,
-      name: "1920s Art Deco Diamond Ring",
-      currentBid: 4500,
-      minBid: 4600,
-      timeLeft: "1h 23m",
-      verified: true,
-      bids: 12,
-    },
-    {
-      id: 2,
-      name: "Vintage Rolex Submariner",
-      currentBid: 15000,
-      minBid: 15500,
-      timeLeft: "3h 45m",
-      verified: true,
-      bids: 28,
-    },
-    {
-      id: 3,
-      name: "Signed Beatles Album",
-      currentBid: 8200,
-      minBid: 8500,
-      timeLeft: "5h 12m",
-      verified: true,
-      bids: 19,
-    },
-  ];
+  // Fetch live and upcoming auctions
+  const { data: auctionItems = [], isLoading } = useQuery({
+    queryKey: ["auctions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("items")
+        .select("*, bids(count)")
+        .eq("is_auction", true)
+        .in("auction_status", ["live", "upcoming"])
+        .order("start_time", { ascending: true });
 
-  const handlePlaceBid = (itemId: number, minBid: number) => {
+      if (error) throw error;
+      return data;
+    },
+    refetchInterval: 5000, // Refetch every 5 seconds
+  });
+
+  const getTimeLeft = (endTime: string) => {
+    const now = new Date().getTime();
+    const end = new Date(endTime).getTime();
+    const distance = end - now;
+
+    if (distance < 0) return "ENDED";
+
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    return `${hours}h ${minutes}m ${seconds}s`;
+  };
+
+  const handleJoinAuction = (itemId: string) => {
     if (!session) {
-      toast.error("Please sign in to place a bid");
+      toast.error("Please sign in to join the auction");
       navigate("/auth");
       return;
     }
-    
-    // In real app, would process bid through database
-    toast.success(`Bid placed successfully for $${minBid}!`);
+    navigate(`/auction/${itemId}`);
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-16">
+          <p className="text-center">Loading auctions...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -83,58 +92,68 @@ const Auctions = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {auctionItems.map((item) => (
-            <Card key={item.id} className="vintage-border hover:shadow-lg transition-all">
-              <CardHeader>
-                <div className="flex items-center justify-between mb-2">
-                  <Badge variant="secondary" className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {item.timeLeft}
-                  </Badge>
-                  {item.verified && (
-                    <Badge className="flex items-center gap-1">
-                      <ShieldCheck className="h-3 w-3" />
-                      Verified
-                    </Badge>
-                  )}
-                </div>
-                <CardTitle className="font-playfair">{item.name}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Current Bid</p>
-                  <p className="text-3xl font-bold font-cormorant text-primary">
-                    ${item.currentBid.toLocaleString()}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {item.bids} bids placed
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Your Bid (min ${item.minBid.toLocaleString()})
-                  </p>
-                  <Input
-                    type="number"
-                    min={item.minBid}
-                    placeholder={item.minBid.toString()}
-                    className="font-cormorant"
-                  />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button
-                  onClick={() => handlePlaceBid(item.id, item.minBid)}
-                  className="w-full"
-                >
-                  <Hammer className="mr-2 h-4 w-4" />
-                  Place Bid
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+        {auctionItems.length === 0 ? (
+          <Card className="text-center py-12">
+            <CardContent>
+              <p className="text-muted-foreground">No live auctions at the moment</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {auctionItems.map((item) => {
+              const timeLeft = item.end_time ? getTimeLeft(item.end_time) : "TBD";
+              const isLive = item.auction_status === "live";
+              
+              return (
+                <Card key={item.id} className="vintage-border hover:shadow-lg transition-all">
+                  <CardHeader>
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge 
+                        variant={isLive ? "destructive" : "secondary"} 
+                        className="flex items-center gap-1"
+                      >
+                        <Clock className="h-3 w-3" />
+                        {timeLeft}
+                      </Badge>
+                      {item.verified && (
+                        <Badge className="flex items-center gap-1">
+                          <ShieldCheck className="h-3 w-3" />
+                          Verified
+                        </Badge>
+                      )}
+                    </div>
+                    <CardTitle className="font-playfair">{item.name}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {item.image_url && (
+                      <img 
+                        src={item.image_url} 
+                        alt={item.name}
+                        className="w-full h-48 object-cover rounded-lg"
+                      />
+                    )}
+                    <div>
+                      <p className="text-sm text-muted-foreground">Current Bid</p>
+                      <p className="text-3xl font-bold font-cormorant text-primary">
+                        ₹{(item.current_bid || item.price).toLocaleString()}
+                      </p>
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button
+                      onClick={() => handleJoinAuction(item.id)}
+                      className="w-full"
+                      variant={isLive ? "default" : "outline"}
+                    >
+                      <Hammer className="mr-2 h-4 w-4" />
+                      {isLive ? "Join Live Auction" : "View Auction"}
+                    </Button>
+                  </CardFooter>
+                </Card>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
