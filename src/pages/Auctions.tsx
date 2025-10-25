@@ -28,7 +28,7 @@ const Auctions = () => {
   }, []);
 
   // Fetch live and upcoming auctions
-  const { data: auctionItems = [], isLoading } = useQuery({
+  const { data: auctionItems = [], isLoading, refetch } = useQuery({
     queryKey: ["auctions"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -41,8 +41,43 @@ const Auctions = () => {
       if (error) throw error;
       return data;
     },
-    refetchInterval: 5000, // Refetch every 5 seconds
   });
+
+  // Subscribe to real-time updates for all auctions
+  useEffect(() => {
+    const channel = supabase
+      .channel("auctions-list")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "items",
+          filter: "is_auction=eq.true",
+        },
+        () => {
+          console.log("Auction updated");
+          refetch();
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "bids",
+        },
+        () => {
+          console.log("New bid placed");
+          refetch();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetch]);
 
   const getTimeLeft = (endTime: string) => {
     const now = new Date().getTime();

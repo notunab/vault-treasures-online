@@ -43,7 +43,7 @@ const LiveAuction = () => {
       if (error) throw error;
       return data;
     },
-    refetchInterval: 2000, // Refetch every 2 seconds
+    enabled: !!itemId,
   });
 
   // Fetch all bids for this item
@@ -60,10 +60,10 @@ const LiveAuction = () => {
       if (error) throw error;
       return data;
     },
-    refetchInterval: 1000, // Refetch every second
+    enabled: !!itemId,
   });
 
-  // Subscribe to real-time bid updates
+  // Subscribe to real-time bid updates and item changes
   useEffect(() => {
     if (!itemId) return;
 
@@ -77,12 +77,30 @@ const LiveAuction = () => {
           table: "bids",
           filter: `item_id=eq.${itemId}`,
         },
-        () => {
+        (payload) => {
+          console.log("New bid received:", payload);
           refetchBids();
           refetchItem();
-          toast.success("New bid placed!", {
-            description: "The auction is heating up!",
-          });
+          
+          // Only show toast if it's not the current user's bid
+          if (payload.new.user_id !== session?.user?.id) {
+            toast.success("New bid placed!", {
+              description: `${payload.new.bidder_name} placed a bid of ₹${payload.new.amount.toLocaleString()}`,
+            });
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "items",
+          filter: `id=eq.${itemId}`,
+        },
+        (payload) => {
+          console.log("Item updated:", payload);
+          refetchItem();
         }
       )
       .subscribe();
@@ -90,7 +108,7 @@ const LiveAuction = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [itemId, refetchBids, refetchItem]);
+  }, [itemId, session, refetchBids, refetchItem]);
 
   // Countdown timer
   useEffect(() => {
