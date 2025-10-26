@@ -17,6 +17,8 @@ import Dashboard from "./pages/Dashboard";
 import ListItem from "./pages/ListItem";
 import CreateAuction from "./pages/CreateAuction";
 import LiveAuction from "./pages/LiveAuction";
+import MyBids from "./pages/MyBids";
+import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +44,8 @@ const App = () => (
           <Route path="/cart" element={<Cart />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/list-item" element={<ListItem />} />
+          <Route path="/my-bids" element={<MyBids />} />
+          <Route path="/checkout/:itemId" element={<Checkout />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

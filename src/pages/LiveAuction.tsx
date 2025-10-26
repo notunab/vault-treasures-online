@@ -46,19 +46,24 @@ const LiveAuction = () => {
     enabled: !!itemId,
   });
 
-  // Fetch all bids for this item
+  // Fetch all bids for this item with bidder profiles
   const { data: bids = [], refetch: refetchBids } = useQuery({
     queryKey: ["auction-bids", itemId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("bids")
-        .select("*, profiles(full_name)")
+        .select(`
+          *,
+          profiles!bids_bidder_id_fkey(
+            full_name
+          )
+        `)
         .eq("item_id", itemId)
         .order("amount", { ascending: false })
         .limit(10);
 
       if (error) throw error;
-      return data;
+      return data as any[];
     },
     enabled: !!itemId,
   });
@@ -85,7 +90,7 @@ const LiveAuction = () => {
           // Only show toast if it's not the current user's bid
           if (payload.new.user_id !== session?.user?.id) {
             toast.success("New bid placed!", {
-              description: `${payload.new.bidder_name} placed a bid of ₹${payload.new.amount.toLocaleString()}`,
+              description: `New bid of ₹${payload.new.amount.toLocaleString()}`,
             });
           }
         }
@@ -152,40 +157,22 @@ const LiveAuction = () => {
     }
 
     const bidValue = parseFloat(bidAmount);
-    const currentBid = item?.current_bid || 0;
-    const minIncrement = item?.min_bid_increment || 50;
-    const minBid = currentBid + minIncrement;
-
-    if (bidValue < minBid) {
-      toast.error(`Minimum bid is ₹${minBid.toLocaleString()}`);
-      return;
-    }
 
     try {
-      // Get user profile for bidder name
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("full_name")
-        .eq("id", session.user.id)
-        .single();
-
-      // Insert bid
-      const { error: bidError } = await supabase.from("bids").insert({
-        item_id: itemId,
-        user_id: session.user.id,
-        amount: bidValue,
-        bidder_name: profile?.full_name || "Anonymous",
+      // Use the RPC function to place bid (handles race conditions)
+      const { data, error } = await supabase.rpc("place_bid", {
+        p_item_id: itemId,
+        p_bidder_id: session.user.id,
+        p_amount: bidValue,
       });
 
-      if (bidError) throw bidError;
+      if (error) throw error;
 
-      // Update item's current bid
-      const { error: updateError } = await supabase
-        .from("items")
-        .update({ current_bid: bidValue })
-        .eq("id", itemId);
-
-      if (updateError) throw updateError;
+      const result = data as any;
+      if (result && !result.ok) {
+        toast.error(result.error);
+        return;
+      }
 
       toast.success("Bid placed successfully!");
       setBidAmount("");
@@ -258,11 +245,11 @@ const LiveAuction = () => {
                     <div className="flex items-center gap-2 text-sm">
                       <Avatar className="h-6 w-6">
                         <AvatarFallback>
-                          {highestBid.bidder_name?.[0] || "?"}
+                          {highestBid.profiles?.full_name?.[0] || "?"}
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-muted-foreground">
-                        Leading: <span className="font-semibold">{highestBid.bidder_name}</span>
+                        Leading: <span className="font-semibold">{highestBid.profiles?.full_name || "Anonymous"}</span>
                       </span>
                     </div>
                   )}
@@ -312,7 +299,7 @@ const LiveAuction = () => {
                   </p>
                 ) : (
                   <div className="space-y-3">
-                    {bids.map((bid, index) => (
+                    {bids.map((bid: any, index) => (
                       <div
                         key={bid.id}
                         className={`p-3 rounded-lg ${
@@ -325,12 +312,12 @@ const LiveAuction = () => {
                           <div className="flex items-center gap-2">
                             <Avatar className="h-8 w-8">
                               <AvatarFallback>
-                                {bid.bidder_name?.[0] || "?"}
+                                {bid.profiles?.full_name?.[0] || "?"}
                               </AvatarFallback>
                             </Avatar>
                             <div>
                               <p className="font-semibold text-sm">
-                                {bid.bidder_name}
+                                {bid.profiles?.full_name || "Anonymous"}
                                 {index === 0 && (
                                   <Badge variant="secondary" className="ml-2 text-xs">
                                     Leading

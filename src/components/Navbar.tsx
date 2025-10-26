@@ -51,6 +51,9 @@ const Navbar = () => {
             <Link to="/auctions" className="text-sm hover:text-primary transition-colors">
               Live Auctions
             </Link>
+            <Link to="/my-bids" className="text-sm hover:text-primary transition-colors">
+              My Bids
+            </Link>
             <Link to="/celebrity" className="text-sm hover:text-primary transition-colors">
               Celebrity Items
             </Link>
