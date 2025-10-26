@@ -14,10 +14,55 @@ export type Database = {
   }
   public: {
     Tables: {
+      addresses: {
+        Row: {
+          city: string
+          country: string
+          created_at: string
+          id: string
+          is_default: boolean | null
+          line1: string
+          line2: string | null
+          name: string
+          phone: string
+          postal_code: string
+          state: string
+          user_id: string
+        }
+        Insert: {
+          city: string
+          country?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean | null
+          line1: string
+          line2?: string | null
+          name: string
+          phone: string
+          postal_code: string
+          state: string
+          user_id: string
+        }
+        Update: {
+          city?: string
+          country?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean | null
+          line1?: string
+          line2?: string | null
+          name?: string
+          phone?: string
+          postal_code?: string
+          state?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       bids: {
         Row: {
           amount: number
-          bidder_name: string | null
+          bidder_id: string | null
           created_at: string
           id: string
           item_id: string
@@ -25,7 +70,7 @@ export type Database = {
         }
         Insert: {
           amount: number
-          bidder_name?: string | null
+          bidder_id?: string | null
           created_at?: string
           id?: string
           item_id: string
@@ -33,7 +78,7 @@ export type Database = {
         }
         Update: {
           amount?: number
-          bidder_name?: string | null
+          bidder_id?: string | null
           created_at?: string
           id?: string
           item_id?: string
@@ -118,6 +163,8 @@ export type Database = {
           current_bid: number | null
           description: string
           end_time: string | null
+          highest_bid: number | null
+          highest_bidder: string | null
           id: string
           image_url: string | null
           is_auction: boolean
@@ -139,6 +186,8 @@ export type Database = {
           current_bid?: number | null
           description: string
           end_time?: string | null
+          highest_bid?: number | null
+          highest_bidder?: string | null
           id?: string
           image_url?: string | null
           is_auction?: boolean
@@ -160,6 +209,8 @@ export type Database = {
           current_bid?: number | null
           description?: string
           end_time?: string | null
+          highest_bid?: number | null
+          highest_bidder?: string | null
           id?: string
           image_url?: string | null
           is_auction?: boolean
@@ -218,6 +269,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          address_id: string | null
           created_at: string
           id: string
           item_id: string
@@ -225,16 +277,13 @@ export type Database = {
           payment_method: string | null
           payment_status: Database["public"]["Enums"]["order_status"]
           price: number
-          shipping_address: string | null
-          shipping_city: string | null
-          shipping_name: string | null
-          shipping_phone: string | null
-          shipping_postal_code: string | null
+          stripe_session_id: string | null
           total_amount: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          address_id?: string | null
           created_at?: string
           id?: string
           item_id: string
@@ -242,16 +291,13 @@ export type Database = {
           payment_method?: string | null
           payment_status?: Database["public"]["Enums"]["order_status"]
           price: number
-          shipping_address?: string | null
-          shipping_city?: string | null
-          shipping_name?: string | null
-          shipping_phone?: string | null
-          shipping_postal_code?: string | null
+          stripe_session_id?: string | null
           total_amount?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          address_id?: string | null
           created_at?: string
           id?: string
           item_id?: string
@@ -259,16 +305,19 @@ export type Database = {
           payment_method?: string | null
           payment_status?: Database["public"]["Enums"]["order_status"]
           price?: number
-          shipping_address?: string | null
-          shipping_city?: string | null
-          shipping_name?: string | null
-          shipping_phone?: string | null
-          shipping_postal_code?: string | null
+          stripe_session_id?: string | null
           total_amount?: number | null
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_address_id_fkey"
+            columns: ["address_id"]
+            isOneToOne: false
+            referencedRelation: "addresses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orders_item_id_fkey"
             columns: ["item_id"]
@@ -325,12 +374,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      close_expired_auctions: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      place_bid: {
+        Args: { p_amount: number; p_bidder_id: string; p_item_id: string }
+        Returns: Json
       }
     }
     Enums: {
